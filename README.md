@@ -1,38 +1,68 @@
-# StmtForge
+<div align="center">
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/banner.svg">
+  <source media="(prefers-color-scheme: light)" srcset="assets/banner.svg">
+  <img alt="StmtForge — Credit Card Statement Parser for Indian Banks" src="assets/banner.svg" width="100%">
+</picture>
+
+# StmtForge — Credit Card Statement Parser & Analyzer
+
+**Open-source, offline-first Python tool to parse credit card PDF statements from Indian banks into structured data.**
 
 [![PyPI version](https://img.shields.io/pypi/v/stmtforge.svg)](https://pypi.org/project/stmtforge/)
-[![Tests](https://github.com/madhav921/stmt-forge/actions/workflows/tests.yml/badge.svg)](https://github.com/madhav921/stmt-forge/actions/workflows/tests.yml)
+[![Downloads](https://img.shields.io/pypi/dm/stmtforge.svg)](https://pypi.org/project/stmtforge/)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
-**A fully local, privacy-first credit card statement parser & analyzer for
-Indian banks.**
+[Install](#installation) · [Quick Start](#quick-start) · [Supported Banks](#supported-banks) · [Dashboard](#dashboard-preview) · [Docs](#how-it-works)
 
-StmtForge extracts transactions from bank-issued PDF statements using a hybrid
-pipeline (deterministic parsers → table extraction → OCR → local LLM), stores
-them in a local SQLite database, and presents insights through an interactive
-Streamlit dashboard.
-
-> **All data stays on your machine.** No cloud uploads. No external API calls.
-> The optional LLM runs locally via [Ollama](https://ollama.com/).
+</div>
 
 ---
 
-## Features
+## Why StmtForge?
 
-| Capability | Details |
+Indian bank credit card statements are password-protected PDFs with inconsistent formats — making expense tracking painful. StmtForge solves this:
+
+- **Parse PDF statements** from Indian banks (Currently implemented: HDFC, ICICI, SBI, Axis, Kotak, Yes, CSB, Federal, IDFC First)
+- **100% offline** — no data leaves your machine, no cloud APIs, no telemetry
+- **Hybrid extraction** — deterministic regex parsers → table extraction → OCR → local LLM (Ollama)
+- **One command** — `pip install stmtforge` and start analyzing your credit card spend
+
+> Built for anyone in India who wants to track credit card expenses without trusting third-party apps with their financial data.
+
+---
+
+## Dashboard Preview
+
+StmtForge includes a **Streamlit analytics dashboard** with interactive charts, filters, and CSV export.
+
+<div align="center">
+
+<img src="images/dashboard.png" alt="StmtForge Dashboard — monthly spend trend, category breakdown, top merchants, bank-wise breakdown" width="90%">
+
+*Analytics: total spend, monthly trends, category breakdown, top merchants, bank & card comparison, daily heatmap, drill-downs*
+
+</div>
+
+---
+
+## Key Features
+
+| Feature | Description |
 |---|---|
-| **Gmail integration** | Fetches statement PDFs via Gmail API (read-only scope) |
-| **PDF unlocking** | pikepdf / qpdf with configurable password patterns |
-| **Hybrid extraction** | Deterministic → table → layout text → OCR → LLM fallback |
-| **Local LLM** | Ollama (Qwen / Mistral / Llama3) for unstructured extraction |
-| **9 bank parsers** | HDFC · ICICI · SBI · Axis · Kotak · Yes · CSB · Federal · IDFC First |
-| **Multi-card support** | Per-card tracking across banks |
-| **Auto-categorization** | Rule-based merchant categorization |
-| **Validation** | Deduplication, date/amount checks, confidence scoring |
-| **SQLite storage** | Local DB with incremental processing |
-| **Dashboard** | Streamlit + Plotly charts, filters, CSV export |
-| **Privacy logging** | DPDP-aligned pseudonymization; PII redacted from all logs |
+| **9 bank-specific parsers** | Dedicated parsers for HDFC, ICICI, SBI, Axis, Kotak, Yes, CSB, Federal, IDFC First |
+| **PDF unlock & parse** | Auto-decrypts password-protected statements (DOB, PAN, custom patterns) |
+| **Hybrid extraction pipeline** | Deterministic → table → OCR → local LLM fallback chain |
+| **Local LLM via Ollama** | Qwen / Mistral / Llama3 for unstructured statement parsing |
+| **Gmail auto-fetch** | Read-only OAuth2 — downloads statement PDFs from Gmail automatically |
+| **Multi-card tracking** | Track spend across multiple cards and banks |
+| **Auto-categorization** | Rule-based merchant classification (Shopping, Food, Travel, EMI, etc.) |
+| **Transaction deduplication** | Hash-based dedup with incremental processing |
+| **Streamlit dashboard** | Interactive Plotly charts, sidebar filters, CSV export |
+| **Privacy-first design** | PII redacted from logs, HMAC pseudonymization, DPDP-aligned |
+| **CLI interface** | `stmtforge run`, `stmtforge dashboard`, `stmtforge init` |
 
 ---
 
@@ -44,7 +74,7 @@ Streamlit dashboard.
 pip install stmtforge
 ```
 
-### From source (for development)
+### From Source
 
 ```bash
 git clone https://github.com/madhav921/stmt-forge.git
@@ -55,186 +85,113 @@ python -m venv .venv
 pip install -e ".[dashboard,dev]"
 ```
 
-### Prerequisites
+### Requirements
 
 | Requirement | Purpose |
 |---|---|
 | Python 3.11+ | Runtime |
-| [Ollama](https://ollama.com/) | Local LLM (optional but recommended) |
-| Google Cloud project | Gmail API access (optional — manual PDF import works without it) |
-| qpdf | Fallback PDF decryption (optional) |
+| [Ollama](https://ollama.com/) *(optional)* | Local LLM for unstructured PDF parsing |
+| Google Cloud project *(optional)* | Gmail API — not needed for manual PDF import |
+| qpdf *(optional)* | Fallback PDF decryption |
 
 ---
 
 ## Quick Start
 
 ```bash
-# 1. Initialize a project directory
+# 1. Set up project
 mkdir ~/my-statements && cd ~/my-statements
-stmtforge init          # creates config.yaml, .env.example, and data/ directories
+stmtforge init          # creates config.yaml, .env.example, data/
 
-# 2. (Optional) Set up Gmail — see docs below
+# 2. Configure PDF passwords
+cp .env.example .env    # then edit .env with your passwords
 
-# 3. Add PDF passwords to .env
-# Windows (PowerShell)
-Copy-Item .env.example .env
-# macOS / Linux
-# cp .env.example .env
-# then edit .env
-
-# 4. Pull an Ollama model
+# 3. (Optional) Set up local LLM
 ollama pull qwen2.5:3b
 
-# 5. Run the pipeline
-stmtforge run --local              # local PDFs only
-stmtforge run --full               # full Gmail fetch + parse
+# 4. Run the pipeline
+stmtforge run --local               # parse local PDFs
+stmtforge run --full                 # Gmail fetch + parse
 stmtforge run --folder path/to/pdfs  # specific folder
 
-# 6. Launch dashboard
+# 5. View insights
 stmtforge dashboard
 ```
 
----
-
-## Privacy & Data Handling
-
-StmtForge is designed around a **local-first, zero-upload** architecture.
-
-| Concern | How it's handled |
-|---|---|
-| **Where data is processed** | Entirely on your local machine |
-| **What data is accessed** | PDF files (local or Gmail), extracted transactions |
-| **External network calls** | Gmail API (opt-in, read-only) and local Ollama only |
-| **Analytics / tracking** | None — no telemetry, no phone-home |
-| **Data storage** | Local SQLite database + local files only |
-| **Log privacy** | All PII (emails, phones, PAN, card numbers) is automatically redacted from logs |
-
-```
-This tool processes credit card statements locally on your machine.
-
-- No data is uploaded to any external server.
-- No user data is stored or logged beyond your local project directory.
-- No analytics or tracking is performed.
-- All parsing and analysis happens entirely offline unless you explicitly
-  enable Gmail integration.
-```
-
-### Gmail Integration (optional)
-
-If you enable Gmail integration:
-
-- The tool uses **read-only** access via the Gmail API
-  (`gmail.readonly` scope).
-- Only emails matching your configured filters (sender domains, keywords like
-  "credit card statement") are accessed.
-- Attachments are downloaded to your local `data/raw_pdfs/` directory.
-- **No email content is stored or transmitted externally.**
-- You can revoke access at any time from
-  [Google Account Permissions](https://myaccount.google.com/permissions).
-
-> Gmail is entirely optional. You can drop PDFs into `data/raw_pdfs/<bank>/`
-> manually and run `stmtforge run --local`.
+**Manual PDF import:** Drop PDFs into `data/raw_pdfs/<bank>/` and run `stmtforge run --local`. No Gmail setup needed.
 
 ---
 
-## Security Practices
+## Supported Banks
 
-| Practice | Implementation |
-|---|---|
-| **PDF passwords** | Loaded from `.env` into memory; never written to logs, database, or disk |
-| **Log redaction** | `RedactionFilter` strips emails, phones, PAN numbers, card numbers from every log line |
-| **Privacy logging** | HMAC pseudonymization for event logs (DPDP-aligned) |
-| **OAuth tokens** | Stored locally (`token.json`); git-ignored by default |
-| **Sensitive config** | `config.yaml` and `.env` are git-ignored; only sanitized templates are committed |
-| **Temporary files** | Unlocked PDFs are kept in `data/unlocked_pdfs/`; no stray temp files |
-| **Dependencies** | Minimum versions pinned; no unnecessary or exotic packages |
-
-For full details and how to report vulnerabilities, see
-[SECURITY.md](SECURITY.md).
-
----
-
-## Supported Banks & Formats
-
-StmtForge includes dedicated parsers for the following banks. Other formats fall
-back to the generic parser + LLM extraction.
-
-| Bank | Parser | Status |
+| Bank | Parser | Card Detection |
 |---|---|---|
-| HDFC Bank | `hdfc_parser` | Tested |
-| ICICI Bank | `icici_parser` | Tested |
-| SBI Card | `sbi_parser` | Tested |
-| Axis Bank | `axis_parser` | Tested |
-| Kotak Mahindra | `kotak_parser` | Tested |
-| Yes Bank | `yes_parser` | Tested |
-| CSB Bank | `csb_parser` | Tested |
-| Federal Bank | `federal_parser` | Tested |
-| IDFC First Bank | `idfc_first_parser` | Tested |
-| *(other)* | `generic_parser` + LLM | Best-effort |
+| HDFC Bank | `hdfc_parser` | Swiggy, Tata Neu, Millennia, etc. |
+| ICICI Bank | `icici_parser` | Amazon Pay, Coral, Platinum, etc. |
+| SBI Card | `sbi_parser` | Cashback, Elite, SimplyCLICK, etc. |
+| Axis Bank | `axis_parser` | Neo, Flipkart, Ace, etc. |
+| Kotak Mahindra | `kotak_parser` | 811, League Platinum, etc. |
+| Yes Bank | `yes_parser` | Marquee, Prosperity, etc. |
+| CSB Bank | `csb_parser` | Edge, etc. |
+| Federal Bank | `federal_parser` | Signet, Scapia, etc. |
+| IDFC First Bank | `idfc_first_parser` | First Select, Classic, WOW, etc. |
+| *Any other bank* | `generic_parser` + LLM | Auto-detected |
 
-> **Note:** Statement formats change over time. If a parser produces incorrect
-> results for a recent statement, please open an issue.
+> Statement formats change over time. Open an issue if a parser produces incorrect results.
 
 ---
 
 ## How It Works
 
 ```
-PDF ─► Unlock ─► Deterministic Parser ─► Multi-Stage Extraction ─► LLM ─► Validation ─► SQLite
+PDF → Unlock → Bank Parser → Table Extraction → OCR → LLM → Validate → SQLite → Dashboard
 ```
 
-1. **PDF Unlock** — Tries password combinations (DOB, PAN, custom) via pikepdf.
-2. **Deterministic Parser** — Bank-specific regex parser runs first. If ≥ 3
-   transactions are found, done.
-3. **Multi-Stage Extraction** (fallback):
-   - Stage 1 — Table extraction (pdfplumber)
-   - Stage 2 — Layout text (pdfplumber / pdftotext)
-   - Stage 3 — OCR (pdf2image + Tesseract, optional)
-4. **LLM Structuring** — Local Ollama with primary → hard-mode → validation
-   prompts.
-5. **Validation** — Date normalization, amount bounds, deduplication, confidence
-   scoring.
-6. **Categorization** — Rule-based merchant classification.
-7. **Storage** — SQLite with transaction-level deduplication.
+1. **PDF Unlock** — Tries password combos (DOB, PAN, custom) via pikepdf
+2. **Bank Parser** — Bank-specific regex parser extracts transactions directly
+3. **Fallback Chain** — Table extraction (pdfplumber) → Layout text → OCR (Tesseract) → Local LLM (Ollama)
+4. **Validation** — Date normalization, amount bounds, dedup, confidence scoring
+5. **Categorization** — Rule-based merchant → category mapping
+6. **Storage** — SQLite with transaction-level deduplication and incremental processing
 
 ---
 
-## Project Structure
+## Privacy & Security
 
-```
-stmt-forge/
-├── src/stmtforge/           # Package source (src-layout)
-│   ├── __init__.py
-│   ├── cli.py               # CLI entry point
-│   ├── run_pipeline.py      # Pipeline orchestrator
-│   ├── hybrid_pipeline.py   # Hybrid extraction engine
-│   ├── config_template.yaml # Default config template
-│   ├── database/            # SQLite layer
-│   ├── dashboard/           # Streamlit app
-│   ├── extractor/           # Multi-stage text extraction
-│   ├── gmail/               # Gmail OAuth & fetcher
-│   ├── llm/                 # Ollama client & prompts
-│   ├── parsers/             # Bank-specific parsers
-│   ├── pdf_processing/      # PDF unlock & extraction
-│   ├── utils/               # Config, logging, privacy, hashing
-│   └── validator/           # Transaction validation
-├── tests/                   # Test suite
-├── .github/workflows/       # CI (GitHub Actions)
-├── pyproject.toml           # Build configuration
-├── .env.example             # Environment variable template
-├── LICENSE                  # MIT
-├── SECURITY.md              # Security policy
-├── CONTRIBUTING.md          # Contributor guide
-├── CODE_OF_CONDUCT.md       # Community standards
-└── README.md                # This file
-```
+StmtForge is built around a **local-first, zero-upload** architecture.
+
+| | |
+|---|---|
+| **Processing** | 100% local — no cloud, no external APIs |
+| **Storage** | Local SQLite + local files only |
+| **Telemetry** | None — no analytics, no phone-home |
+| **Log privacy** | PII auto-redacted (emails, phones, PAN, card numbers) |
+| **PDF passwords** | `.env` → memory only; never logged or stored in DB |
+| **Gmail** | Optional, read-only OAuth2; revoke anytime at [Google Permissions](https://myaccount.google.com/permissions) |
+
+See [SECURITY.md](SECURITY.md) for vulnerability reporting and full security policy.
+
+---
+
+## Configuration
+
+`stmtforge init` creates a `config.yaml` with these sections:
+
+| Section | Purpose |
+|---|---|
+| `gmail` | Sender domains, search keywords, attachment filters |
+| `credit_cards` | Your banks and card names |
+| `pdf_passwords` | Password patterns (from `.env`) |
+| `parsers` | Email/filename → bank mapping, card identifiers |
+| `categories` | Merchant → category rules |
+| `database` | SQLite path |
+| `llm` | Ollama model, URL, temperature |
 
 ---
 
 ## Adding a New Bank Parser
 
 ```python
-# src/stmtforge/parsers/mybank_parser.py
 from stmtforge.parsers.base_parser import BaseParser, parse_date, parse_amount
 
 class MyBankParser(BaseParser):
@@ -245,59 +202,38 @@ class MyBankParser(BaseParser):
         return self._get_standard_df(records)
 ```
 
-Then register in `src/stmtforge/parsers/registry.py` and add email / filename
-mappings in `config_template.yaml`. See [CONTRIBUTING.md](CONTRIBUTING.md) for
-details.
+Register in `src/stmtforge/parsers/registry.py` and add mappings in `config_template.yaml`.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
 
 ---
 
-## Testing
+## Project Structure
 
-```bash
-pytest                 # run full suite
-pytest -v              # verbose output
-pytest tests/test_scope_filter.py  # single file
 ```
-
----
-
-## Configuration
-
-`stmtforge init` copies a sanitized `config_template.yaml` into your project
-directory as `config.yaml`. Key sections:
-
-| Section | Purpose |
-|---|---|
-| `gmail` | Sender domains, search keywords, attachment filters |
-| `credit_cards` | Your banks and card names |
-| `pdf_passwords` | Password patterns (auto-filled from `.env`) |
-| `parsers` | Email → bank mapping, filename → bank mapping, card identifiers |
-| `categories` | Merchant → category rules |
-| `database` | SQLite path |
-| `llm` | Ollama model, URL, temperature |
-| `privacy_logging` | Retention period, pseudonymization salt |
-
----
-
-## Disclaimer
-
-This tool is intended for **personal use and convenience**.
-
-While care has been taken to ensure accuracy:
-
-- Parsing errors may occur depending on statement format changes by banks.
-- Users should **verify extracted data** before making financial decisions.
-- This is **not** a bank-grade or auditor-certified system.
-- The authors assume no liability for incorrect transaction data.
+stmt-forge/
+├── src/stmtforge/           # Package source
+│   ├── cli.py               # CLI entry point
+│   ├── run_pipeline.py      # Pipeline orchestrator
+│   ├── hybrid_pipeline.py   # Hybrid extraction engine
+│   ├── parsers/             # 9 bank parsers + generic + categorizer
+│   ├── dashboard/           # Streamlit analytics app
+│   ├── pdf_processing/      # PDF unlock & text extraction
+│   ├── llm/                 # Ollama client & prompts
+│   ├── gmail/               # Gmail OAuth & fetcher
+│   ├── database/            # SQLite layer
+│   ├── validator/           # Transaction validation
+│   └── utils/               # Config, logging, privacy, hashing
+├── tests/                   # Test suite
+├── pyproject.toml           # Build config
+└── README.md
+```
 
 ---
 
 ## Contributing
 
-We welcome contributions of all kinds — bug reports, new bank parsers,
-documentation improvements, and code fixes. See
-[CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+Bug reports, new bank parsers, and code fixes welcome. See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 
-[MIT](LICENSE) — see the [LICENSE](LICENSE) file for details.
+[MIT](LICENSE)

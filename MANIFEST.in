@@ -3,6 +3,8 @@ include README.md
 include pyproject.toml
 
 recursive-include src/stmtforge *.py *.yaml
+recursive-include assets *.svg *.png
+recursive-include images *.png *.jpg *.webp
 
 exclude .env
 exclude .env.example
@@ -16,3 +18,4 @@ prune tests
 prune .github
 prune deploy
 prune scripts
+prune social_posts

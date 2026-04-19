@@ -5,23 +5,32 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "stmtforge"
 version = "0.1.0"
-description = "Credit Card Statement Parser & Analyzer for Indian Banks"
+description = "Parse credit card PDF statements from Indian banks (HDFC, ICICI, SBI, Axis, Kotak + 4 more) into structured data. Offline, privacy-first, with Streamlit dashboard."
 readme = "README.md"
 license = {text = "MIT"}
 requires-python = ">=3.11"
 authors = [
     {name = "Madhav", email = "madhav921@users.noreply.github.com"},
 ]
-keywords = ["credit-card", "statement", "parser", "finance", "pdf", "india"]
+keywords = [
+    "credit-card", "statement-parser", "pdf-parser", "indian-banks",
+    "personal-finance", "expense-tracker", "hdfc", "icici", "sbi",
+    "offline", "privacy", "streamlit-dashboard", "ollama", "ocr",
+    "transaction-parser", "bank-statement",
+]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: End Users/Desktop",
+    "Intended Audience :: Financial and Insurance Industry",
     "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "Topic :: Office/Business :: Financial",
+    "Topic :: Office/Business :: Financial :: Accounting",
+    "Topic :: Utilities",
 ]
 
 dependencies = [

@@ -24,37 +24,189 @@ from stmtforge.utils.privacy_logging import PrivacyEventLogger, pseudonymize_val
 
 # ── Page config ──────────────────────────────────────────────────
 st.set_page_config(
-    page_title="StmtForge - Credit Card Dashboard",
-    page_icon="💳",
+    page_title="StmtForge — Credit Card Analytics",
+    page_icon="📊",
     layout="wide",
     initial_sidebar_state="expanded",
+)
+
+# ── Design System ────────────────────────────────────────────────
+# Cohesive palette: deep navy base, teal/emerald accents, warm amber highlights
+COLORS = {
+    "primary": "#0f172a",      # slate-900
+    "secondary": "#1e293b",    # slate-800
+    "accent": "#0ea5e9",       # sky-500
+    "accent2": "#10b981",      # emerald-500
+    "accent3": "#f59e0b",      # amber-500
+    "accent4": "#8b5cf6",      # violet-500
+    "accent5": "#ec4899",      # pink-500
+    "text": "#f8fafc",         # slate-50
+    "text_muted": "#94a3b8",   # slate-400
+    "surface": "#1e293b",      # slate-800
+    "border": "#334155",       # slate-700
+    "success": "#10b981",
+    "warning": "#f59e0b",
+    "error": "#ef4444",
+}
+
+# Professional chart color sequence
+CHART_COLORS = [
+    "#0ea5e9", "#10b981", "#f59e0b", "#8b5cf6", "#ec4899",
+    "#06b6d4", "#84cc16", "#f97316", "#6366f1", "#14b8a6",
+    "#e879f9", "#22d3ee", "#a3e635", "#fb923c", "#818cf8",
+]
+
+PLOTLY_LAYOUT = dict(
+    paper_bgcolor="rgba(0,0,0,0)",
+    plot_bgcolor="rgba(0,0,0,0)",
+    font=dict(family="Inter, -apple-system, system-ui, sans-serif", color="#e2e8f0", size=12),
+    margin=dict(l=0, r=0, t=10, b=0),
+    xaxis=dict(gridcolor="rgba(148,163,184,0.1)", zerolinecolor="rgba(148,163,184,0.1)"),
+    yaxis=dict(gridcolor="rgba(148,163,184,0.1)", zerolinecolor="rgba(148,163,184,0.1)"),
+    hoverlabel=dict(bgcolor="#1e293b", font_size=13, font_family="Inter, sans-serif", bordercolor="#334155"),
 )
 
 # ── Custom CSS ───────────────────────────────────────────────────
 st.markdown("""
 <style>
-    .metric-card {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        padding: 20px;
-        border-radius: 12px;
-        color: white;
-        text-align: center;
+    /* ── Global ─────────────────────────────────── */
+    .stApp { background-color: #0f172a; }
+    .stApp header { background-color: #0f172a !important; }
+
+    /* ── Sidebar ────────────────────────────────── */
+    section[data-testid="stSidebar"] {
+        background-color: #1e293b;
+        border-right: 1px solid #334155;
     }
-    .metric-card h3 {
-        margin: 0;
-        font-size: 14px;
+    section[data-testid="stSidebar"] .stMarkdown h1,
+    section[data-testid="stSidebar"] .stMarkdown h2,
+    section[data-testid="stSidebar"] .stMarkdown h3 {
+        color: #f1f5f9;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+    }
+    section[data-testid="stSidebar"] hr {
+        border-color: #334155;
+    }
+
+    /* ── Metric cards ───────────────────────────── */
+    div[data-testid="stMetric"] {
+        background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+        border: 1px solid #334155;
+        border-radius: 12px;
+        padding: 16px 20px;
+        transition: border-color 0.2s;
+    }
+    div[data-testid="stMetric"]:hover {
+        border-color: #0ea5e9;
+    }
+    div[data-testid="stMetric"] label {
+        color: #94a3b8 !important;
+        font-size: 0.75rem !important;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        font-weight: 500 !important;
+    }
+    div[data-testid="stMetric"] div[data-testid="stMetricValue"] {
+        color: #f1f5f9 !important;
+        font-weight: 700 !important;
+        font-size: 1.5rem !important;
+    }
+
+    /* ── Cards / containers ─────────────────────── */
+    .chart-container {
+        background: #1e293b;
+        border: 1px solid #334155;
+        border-radius: 12px;
+        padding: 24px;
+        margin-bottom: 16px;
+    }
+    .chart-title {
+        color: #f1f5f9;
+        font-size: 1rem;
+        font-weight: 600;
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    /* ── Section headers ────────────────────────── */
+    .stMarkdown h3, .stMarkdown h2 {
+        color: #f1f5f9 !important;
+        font-weight: 600 !important;
+        letter-spacing: -0.01em;
+    }
+    .stMarkdown hr {
+        border-color: #334155 !important;
+    }
+
+    /* ── Tabs ───────────────────────────────────── */
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 0;
+        background-color: #1e293b;
+        border-radius: 10px;
+        padding: 4px;
+        border: 1px solid #334155;
+    }
+    .stTabs [data-baseweb="tab"] {
+        border-radius: 8px;
+        color: #94a3b8;
+        font-weight: 500;
+        padding: 8px 20px;
+    }
+    .stTabs [aria-selected="true"] {
+        background-color: #0ea5e9 !important;
+        color: #ffffff !important;
+    }
+    .stTabs [data-baseweb="tab-highlight"] {
+        display: none;
+    }
+    .stTabs [data-baseweb="tab-border"] {
+        display: none;
+    }
+
+    /* ── Dataframe ──────────────────────────────── */
+    .stDataFrame {
+        border: 1px solid #334155;
+        border-radius: 8px;
+    }
+
+    /* ── Buttons ────────────────────────────────── */
+    .stDownloadButton > button {
+        background: linear-gradient(135deg, #0ea5e9, #0284c7);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        padding: 10px 24px;
+        transition: opacity 0.2s;
+    }
+    .stDownloadButton > button:hover {
         opacity: 0.9;
     }
-    .metric-card h1 {
-        margin: 5px 0;
-        font-size: 28px;
+
+    /* ── Select / inputs ────────────────────────── */
+    .stSelectbox > div > div,
+    .stMultiSelect > div > div,
+    .stNumberInput > div > div > input,
+    .stTextInput > div > div > input {
+        background-color: #0f172a;
+        border-color: #334155;
+        color: #e2e8f0;
     }
-    .stMetric > div {
-        background-color: #f8f9fa;
-        padding: 12px;
-        border-radius: 8px;
-        border-left: 4px solid #667eea;
+
+    /* ── Multiselect tags ───────────────────────── */
+    span[data-baseweb="tag"] {
+        background-color: #0ea5e9 !important;
+        border-radius: 6px !important;
     }
+
+    /* ── Hide default footer ────────────────────── */
+    footer { visibility: hidden; }
+
+    /* ── Info/warning/success boxes ──────────────── */
+    .stAlert { border-radius: 8px; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -112,15 +264,44 @@ def main():
         st.session_state["client_page_view_logged"] = True
 
     # ── Sidebar ──────────────────────────────────────────────────
-    st.sidebar.title("💳 CCAnalyser")
+    _logo_svg = (
+        '<svg width="48" height="48" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">'
+        '<rect width="200" height="200" rx="40" fill="#0B1220"/>'
+        '<rect x="50" y="60" width="100" height="10" rx="5" fill="#22D3EE"/>'
+        '<rect x="50" y="85" width="80" height="10" rx="5" fill="#22D3EE" opacity="0.7"/>'
+        '<rect x="50" y="110" width="90" height="10" rx="5" fill="#22D3EE" opacity="0.5"/>'
+        '<rect x="80" y="130" width="40" height="30" rx="6" fill="#6366F1"/>'
+        '<path d="M90 130 V115 A10 10 0 0 1 110 115 V130" fill="none" stroke="#6366F1" stroke-width="4"/>'
+        '</svg>'
+    )
+    st.sidebar.markdown(f"""
+    <div style="text-align:center; padding: 8px 0 4px 0;">
+        {_logo_svg}
+        <div style="margin-top:6px;">
+            <span style="font-size:1.6rem; font-weight:700; color:#f1f5f9; letter-spacing:-0.02em;">
+                StmtForge
+            </span>
+        </div>
+        <span style="font-size:0.7rem; color:#64748b; letter-spacing:0.05em; text-transform:uppercase;">
+            Credit Card Analytics
+        </span>
+    </div>
+    """, unsafe_allow_html=True)
     st.sidebar.markdown("---")
 
     summary = db.get_summary()
 
     # ── Always show tabs (Parse PDF works even with empty DB) ────
-    st.title("💳 Credit Card Analytics Dashboard")
+    st.markdown("""
+    <h1 style="font-size:1.8rem; font-weight:700; color:#f1f5f9; margin-bottom:4px; letter-spacing:-0.02em;">
+        Credit Card Analytics
+    </h1>
+    <p style="color:#64748b; font-size:0.85rem; margin-bottom:20px;">
+        Analyze spend across all your banks and cards
+    </p>
+    """, unsafe_allow_html=True)
     tab_analytics, tab_statements, tab_parse = st.tabs(
-        ["📊 Analytics", "📁 Statements", "📤 Parse PDF"]
+        ["Analytics", "Statements", "Parse PDF"]
     )
 
     with tab_parse:
@@ -326,7 +507,6 @@ def _render_analytics(df: "pd.DataFrame") -> None:
     credits = df[df["type"] == "credit"]
 
     # ── Summary Cards ─────────────────────────────────────────────
-    st.markdown("### 📊 Overview")
     m1, m2, m3, m4, m5 = st.columns(5)
 
     total_spend = debits["amount"].sum()
@@ -338,7 +518,7 @@ def _render_analytics(df: "pd.DataFrame") -> None:
 
     m1.metric("Total Spend", format_inr(total_spend))
     m2.metric("Total Credits", format_inr(total_credit))
-    m3.metric("Avg Monthly Spend", format_inr(avg_monthly))
+    m3.metric("Avg Monthly", format_inr(avg_monthly))
     m4.metric("Top Category", top_category)
     m5.metric("Transactions", f"{num_txns:,}")
 
@@ -348,115 +528,126 @@ def _render_analytics(df: "pd.DataFrame") -> None:
     chart_col1, chart_col2 = st.columns(2)
 
     with chart_col1:
-        st.subheader("📈 Monthly Spend Trend")
+        st.markdown('<div class="chart-title">Monthly Spend Trend</div>', unsafe_allow_html=True)
         monthly = debits.groupby("month").agg(
             total=("amount", "sum"),
             count=("amount", "count"),
         ).reset_index()
 
         if not monthly.empty:
-            fig = px.line(
-                monthly, x="month", y="total",
-                markers=True,
-                labels={"month": "Month", "total": "Amount (₹)"},
-            )
-            fig.update_traces(
-                line=dict(color="#667eea", width=3),
-                marker=dict(size=8),
-            )
+            fig = go.Figure()
+            fig.add_trace(go.Scatter(
+                x=monthly["month"], y=monthly["total"],
+                mode="lines+markers",
+                line=dict(color="#0ea5e9", width=2.5, shape="spline"),
+                marker=dict(size=6, color="#0ea5e9", line=dict(width=1, color="#0f172a")),
+                fill="tozeroy",
+                fillcolor="rgba(14,165,233,0.08)",
+                hovertemplate="<b>%{x}</b><br>₹%{y:,.0f}<extra></extra>",
+            ))
             fig.update_layout(
-                hovermode="x unified",
+                **PLOTLY_LAYOUT,
                 yaxis_tickprefix="₹",
-                margin=dict(l=0, r=0, t=10, b=0),
+                hovermode="x unified",
+                height=350,
             )
             st.plotly_chart(fig, use_container_width=True)
 
     with chart_col2:
-        st.subheader("🎯 Category Breakdown")
+        st.markdown('<div class="chart-title">Category Breakdown</div>', unsafe_allow_html=True)
         cat_spend = debits.groupby("category")["amount"].sum().reset_index()
         cat_spend = cat_spend.sort_values("amount", ascending=False)
 
         if not cat_spend.empty:
-            fig = px.pie(
-                cat_spend, values="amount", names="category",
-                hole=0.4,
-                color_discrete_sequence=px.colors.qualitative.Set3,
-            )
-            fig.update_traces(
-                textposition="inside",
+            fig = go.Figure(data=[go.Pie(
+                labels=cat_spend["category"],
+                values=cat_spend["amount"],
+                hole=0.55,
+                marker=dict(colors=CHART_COLORS[:len(cat_spend)], line=dict(color="#0f172a", width=2)),
                 textinfo="percent+label",
-                hovertemplate="%{label}: ₹%{value:,.0f}<extra></extra>",
-            )
-            fig.update_layout(margin=dict(l=0, r=0, t=10, b=0))
+                textposition="outside",
+                textfont=dict(size=11, color="#e2e8f0"),
+                hovertemplate="<b>%{label}</b><br>₹%{value:,.0f}<br>%{percent}<extra></extra>",
+                pull=[0.03 if i == 0 else 0 for i in range(len(cat_spend))],
+            )])
+            fig.update_layout(**PLOTLY_LAYOUT, height=350, showlegend=False)
             st.plotly_chart(fig, use_container_width=True)
 
     # ── Charts Row 2 ─────────────────────────────────────────────
     chart_col3, chart_col4 = st.columns(2)
 
     with chart_col3:
-        st.subheader("🏪 Top Merchants by Spend")
-        merchant_spend = debits.groupby("description")["amount"].sum().nlargest(15).reset_index()
+        st.markdown('<div class="chart-title">Top Merchants</div>', unsafe_allow_html=True)
+        merchant_spend = debits.groupby("description")["amount"].sum().nlargest(10).reset_index()
 
         if not merchant_spend.empty:
-            fig = px.bar(
-                merchant_spend, x="amount", y="description",
+            fig = go.Figure(data=[go.Bar(
+                x=merchant_spend["amount"],
+                y=merchant_spend["description"],
                 orientation="h",
-                labels={"amount": "Amount (₹)", "description": "Merchant"},
-                color="amount",
-                color_continuous_scale="Viridis",
-            )
-            fig.update_layout(
-                yaxis=dict(autorange="reversed"),
-                xaxis_tickprefix="₹",
-                showlegend=False,
-                coloraxis_showscale=False,
-                margin=dict(l=0, r=0, t=10, b=0),
-            )
+                marker=dict(
+                    color=merchant_spend["amount"],
+                    colorscale=[[0, "#0ea5e9"], [1, "#10b981"]],
+                    cornerradius=4,
+                    line=dict(width=0),
+                ),
+                hovertemplate="<b>%{y}</b><br>₹%{x:,.0f}<extra></extra>",
+            )])
+            fig.update_layout(**PLOTLY_LAYOUT, xaxis_tickprefix="₹", height=400)
+            fig.update_layout(yaxis=dict(autorange="reversed", gridcolor="rgba(0,0,0,0)"))
             st.plotly_chart(fig, use_container_width=True)
 
     with chart_col4:
-        st.subheader("🏦 Spend by Bank & Card")
+        st.markdown('<div class="chart-title">Spend by Bank & Card</div>', unsafe_allow_html=True)
         if "card_name" in debits.columns and debits["card_name"].notna().any():
             debits_with_card = debits.copy()
             debits_with_card["bank_card"] = debits_with_card.apply(
-                lambda r: f"{r['bank']} - {r['card_name']}" if pd.notna(r.get("card_name")) else r["bank"],
+                lambda r: f"{r['bank']} · {r['card_name']}" if pd.notna(r.get("card_name")) else r["bank"],
                 axis=1,
             )
             card_spend = debits_with_card.groupby("bank_card")["amount"].sum().reset_index()
             card_spend = card_spend.sort_values("amount", ascending=False)
             if not card_spend.empty:
-                fig = px.bar(
-                    card_spend, x="bank_card", y="amount",
-                    labels={"amount": "Amount (₹)", "bank_card": "Bank - Card"},
-                    color="bank_card",
-                    color_discrete_sequence=px.colors.qualitative.Pastel,
-                )
+                fig = go.Figure(data=[go.Bar(
+                    x=card_spend["bank_card"],
+                    y=card_spend["amount"],
+                    marker=dict(
+                        color=CHART_COLORS[:len(card_spend)],
+                        cornerradius=4,
+                        line=dict(width=0),
+                    ),
+                    hovertemplate="<b>%{x}</b><br>₹%{y:,.0f}<extra></extra>",
+                )])
                 fig.update_layout(
+                    **PLOTLY_LAYOUT,
                     yaxis_tickprefix="₹",
-                    showlegend=False,
-                    margin=dict(l=0, r=0, t=10, b=0),
+                    height=400,
                 )
                 st.plotly_chart(fig, use_container_width=True)
         else:
             bank_spend = debits.groupby("bank")["amount"].sum().reset_index()
             bank_spend = bank_spend.sort_values("amount", ascending=False)
             if not bank_spend.empty:
-                fig = px.bar(
-                    bank_spend, x="bank", y="amount",
-                    labels={"amount": "Amount (₹)", "bank": "Bank"},
-                    color="bank",
-                    color_discrete_sequence=px.colors.qualitative.Pastel,
-                )
+                fig = go.Figure(data=[go.Bar(
+                    x=bank_spend["bank"],
+                    y=bank_spend["amount"],
+                    marker=dict(
+                        color=CHART_COLORS[:len(bank_spend)],
+                        cornerradius=4,
+                        line=dict(width=0),
+                    ),
+                    hovertemplate="<b>%{x}</b><br>₹%{y:,.0f}<extra></extra>",
+                )])
                 fig.update_layout(
+                    **PLOTLY_LAYOUT,
                     yaxis_tickprefix="₹",
-                    showlegend=False,
-                    margin=dict(l=0, r=0, t=10, b=0),
+                    height=400,
                 )
                 st.plotly_chart(fig, use_container_width=True)
 
     # ── Daily Heatmap ─────────────────────────────────────────────
     st.markdown("---")
-    st.subheader("🗓️ Daily Spend Heatmap")
+    st.markdown('<div class="chart-title">Daily Spend Heatmap</div>', unsafe_allow_html=True)
 
     if not debits.empty:
         daily = debits.groupby("date")["amount"].sum().reset_index()
@@ -466,21 +657,18 @@ def _render_analytics(df: "pd.DataFrame") -> None:
         fig = px.scatter(
             daily, x="date", y="day_of_week",
             size="amount", color="amount",
-            color_continuous_scale="YlOrRd",
-            size_max=20,
+            color_continuous_scale=[[0, "#0f172a"], [0.3, "#0ea5e9"], [0.7, "#f59e0b"], [1, "#ef4444"]],
+            size_max=18,
             labels={"amount": "Spend (₹)", "day_of_week": "Day", "date": "Date"},
             category_orders={"day_of_week": day_order},
         )
-        fig.update_layout(
-            yaxis=dict(categoryorder="array", categoryarray=day_order[::-1]),
-            margin=dict(l=0, r=0, t=10, b=0),
-            height=300,
-        )
+        fig.update_layout(**PLOTLY_LAYOUT, height=280, coloraxis_colorbar=dict(title="Spend (₹)", tickprefix="₹", bgcolor="rgba(0,0,0,0)"))
+        fig.update_layout(yaxis=dict(categoryorder="array", categoryarray=day_order[::-1], gridcolor="rgba(0,0,0,0)"))
         st.plotly_chart(fig, use_container_width=True)
 
     # ── Category Drill-down ───────────────────────────────────────
     st.markdown("---")
-    st.subheader("🔍 Category Drill-down")
+    st.markdown('<div class="chart-title">Category Drill-down</div>', unsafe_allow_html=True)
 
     if not debits.empty:
         selected_drill_category = st.selectbox(
@@ -495,36 +683,32 @@ def _render_analytics(df: "pd.DataFrame") -> None:
         with drill_col1:
             cat_monthly = cat_df.groupby("month")["amount"].sum().reset_index()
             if not cat_monthly.empty:
-                fig = px.bar(
-                    cat_monthly, x="month", y="amount",
-                    labels={"month": "Month", "amount": "Amount (₹)"},
-                    color_discrete_sequence=["#667eea"],
-                )
-                fig.update_layout(
-                    yaxis_tickprefix="₹",
-                    margin=dict(l=0, r=0, t=10, b=0),
-                )
+                fig = go.Figure(data=[go.Bar(
+                    x=cat_monthly["month"],
+                    y=cat_monthly["amount"],
+                    marker=dict(color="#8b5cf6", cornerradius=4, line=dict(width=0)),
+                    hovertemplate="<b>%{x}</b><br>₹%{y:,.0f}<extra></extra>",
+                )])
+                fig.update_layout(**PLOTLY_LAYOUT, yaxis_tickprefix="₹", height=350)
                 st.plotly_chart(fig, use_container_width=True)
 
         with drill_col2:
             cat_merchants = cat_df.groupby("description")["amount"].sum().nlargest(10).reset_index()
             if not cat_merchants.empty:
-                fig = px.bar(
-                    cat_merchants, x="amount", y="description",
+                fig = go.Figure(data=[go.Bar(
+                    x=cat_merchants["amount"],
+                    y=cat_merchants["description"],
                     orientation="h",
-                    labels={"amount": "Amount (₹)", "description": "Merchant"},
-                    color_discrete_sequence=["#764ba2"],
-                )
-                fig.update_layout(
-                    yaxis=dict(autorange="reversed"),
-                    xaxis_tickprefix="₹",
-                    margin=dict(l=0, r=0, t=10, b=0),
-                )
+                    marker=dict(color="#ec4899", cornerradius=4, line=dict(width=0)),
+                    hovertemplate="<b>%{y}</b><br>₹%{x:,.0f}<extra></extra>",
+                )])
+                fig.update_layout(**PLOTLY_LAYOUT, xaxis_tickprefix="₹", height=350)
+                fig.update_layout(yaxis=dict(autorange="reversed", gridcolor="rgba(0,0,0,0)"))
                 st.plotly_chart(fig, use_container_width=True)
 
     # ── Transaction Table ─────────────────────────────────────────
     st.markdown("---")
-    st.subheader("📋 Transaction Details")
+    st.markdown('<div class="chart-title">Transaction Details</div>', unsafe_allow_html=True)
 
     sort_col1, sort_col2 = st.columns([3, 1])
     sort_by = sort_col1.selectbox(
@@ -567,7 +751,7 @@ def _render_analytics(df: "pd.DataFrame") -> None:
     st.download_button(
         label="📥 Download Filtered Data as CSV",
         data=csv_data.to_csv(index=False).encode("utf-8"),
-        file_name=f"ccanalyser_export_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
+        file_name=f"stmtforge_export_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
         mime="text/csv",
     )
 
@@ -590,7 +774,7 @@ def _load_statements(_db):
 
 
 def _render_statements(db) -> None:
-    st.subheader("📁 Processed Statements")
+    st.markdown('<div class="chart-title">Processed Statements</div>', unsafe_allow_html=True)
 
     sm = _load_statements(db)
 
@@ -623,16 +807,13 @@ def _render_statements(db) -> None:
                 barmode="stack",
                 labels={"bank": "Bank", "count": "Statements", "status": "Status"},
                 color_discrete_map={
-                    "completed": "#4caf50",
-                    "no_data": "#ff9800",
-                    "error": "#f44336",
-                    "pending": "#9e9e9e",
+                    "completed": "#10b981",
+                    "no_data": "#f59e0b",
+                    "error": "#ef4444",
+                    "pending": "#64748b",
                 },
             )
-            fig.update_layout(
-                margin=dict(l=0, r=0, t=10, b=0),
-                showlegend=True,
-            )
+            fig.update_layout(**PLOTLY_LAYOUT, showlegend=True, height=300)
             st.plotly_chart(fig, use_container_width=True)
 
     st.markdown("---")
@@ -819,10 +1000,10 @@ def _do_parse(
 
 def _render_parse_pdf(db: "Database") -> None:
     """Render the Parse PDF tab — full pipeline without Gmail fetch."""
-    st.subheader("📤 Parse PDF Statement")
+    st.markdown('<div class="chart-title">Parse PDF Statement</div>', unsafe_allow_html=True)
     st.caption(
-        "Upload any credit card statement PDF to extract transactions using the same "
-        "pipeline as the main flow. No Gmail fetch required — results are saved to the database."
+        "Upload a credit card statement PDF to extract transactions. "
+        "Results are saved to the database automatically."
     )
 
     # ── Upload + options row ──────────────────────────────────────
@@ -903,7 +1084,7 @@ def _display_parse_result(result: dict, filename: str) -> None:
     bank = result.get("detected_bank", "unknown")
     unlock_status = result.get("unlock_status", "")
 
-    st.subheader("📊 Parse Results")
+    st.markdown('<div class="chart-title">Parse Results</div>', unsafe_allow_html=True)
 
     # ── Top metrics ───────────────────────────────────────────────
     mc1, mc2, mc3, mc4, mc5 = st.columns(5)

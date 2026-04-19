@@ -40,5 +40,7 @@ Thumbs.db
 # Local reference docs (not for git)
 _local_reference/
 
+local/
+
 # Build / migration artifacts
 _transform.py
