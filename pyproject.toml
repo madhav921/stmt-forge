@@ -1,0 +1,67 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "stmtforge"
+version = "0.1.0"
+description = "Credit Card Statement Parser & Analyzer for Indian Banks"
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.11"
+authors = [
+    {name = "Madhav", email = "madhav921@users.noreply.github.com"},
+]
+keywords = ["credit-card", "statement", "parser", "finance", "pdf", "india"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: End Users/Desktop",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Office/Business :: Financial",
+]
+
+dependencies = [
+    "google-api-python-client>=2.100.0",
+    "google-auth-httplib2>=0.1.0",
+    "google-auth-oauthlib>=1.1.0",
+    "pikepdf>=8.0.0",
+    "pdfplumber>=0.10.0",
+    "pandas>=2.0.0",
+    "pyyaml>=6.0",
+    "python-dotenv>=1.0.0",
+]
+
+[project.optional-dependencies]
+dashboard = [
+    "streamlit>=1.28.0",
+    "plotly>=5.18.0",
+]
+ocr = [
+    "pdf2image>=1.16.0",
+    "pytesseract>=0.3.10",
+    "Pillow>=10.0.0",
+]
+dev = [
+    "pytest>=8.0.0",
+    "build",
+]
+
+[project.scripts]
+stmtforge = "stmtforge.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/madhav921/stmt-forge"
+Repository = "https://github.com/madhav921/stmt-forge"
+Issues = "https://github.com/madhav921/stmt-forge/issues"
+Security = "https://github.com/madhav921/stmt-forge/blob/main/SECURITY.md"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]

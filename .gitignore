@@ -1,0 +1,44 @@
+# Data directories
+data/
+*.db
+
+# Credentials & secrets
+credentials.json
+token.json
+.env
+/config.yaml
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+*.egg
+.eggs/
+.pytest_cache/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Logs
+*.log
+
+# Local reference docs (not for git)
+_local_reference/
+
+# Build / migration artifacts
+_transform.py

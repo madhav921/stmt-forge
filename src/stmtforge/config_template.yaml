@@ -1,0 +1,168 @@
+# ============================================================
+# StmtForge Configuration
+# ============================================================
+# Copy this file to your project directory as config.yaml
+# and fill in your settings.
+
+# Gmail API settings
+gmail:
+  credentials_file: "credentials.json"
+  token_file: "token.json"
+  scopes:
+    - "https://www.googleapis.com/auth/gmail.readonly"
+
+  search:
+    keywords:
+      - "credit card statement"
+      - "e-statement"
+      - "card statement"
+      - "credit card"
+
+    exclude_keywords:
+      - "savings account"
+      - "current account"
+      - "salary account"
+      - "fixed deposit"
+      - "recurring deposit"
+      - "demat"
+      - "loan account statement"
+
+    require_attachment: true
+    attachment_type: "pdf"
+    initial_start_date: "2024-06-01"
+    incremental_lookback_days: 45
+
+  allowed_sender_domains:
+    - "hdfcbank.com"
+    - "hdfcbank.net"
+    - "icicibank.com"
+    - "sbi.co.in"
+    - "sbicard.com"
+    - "axisbank.com"
+    - "axisbank.co.in"
+    - "yesbank.in"
+    - "federalbank.co.in"
+    - "idfcfirstbank.com"
+    - "csb.co.in"
+    - "csbbank.in"
+
+# Your Credit Cards
+# Each bank → list of card names you hold.
+credit_cards:
+  hdfc:
+    - "Swiggy"
+  icici:
+    - "Coral"
+  sbi:
+    - "Elite"
+  # Add your banks and cards here
+
+# PDF password configuration
+pdf_passwords:
+  dob_patterns: []      # Auto-populated from .env DOB
+  pan_numbers: []        # Auto-populated from .env PAN
+  name_passwords: []
+  custom_passwords: []
+  max_attempts: 50
+
+# Bank parser configuration
+parsers:
+  email_to_bank:
+    "hdfcbank": "hdfc"
+    "icicibank": "icici"
+    "sbicard": "sbi"
+    "sbi.co": "sbi"
+    "axisbank": "axis"
+    "yesbank": "yes"
+    "federalbank": "federal"
+    "idfcfirstbank": "idfc_first"
+    "csb.co": "csb"
+    "csbbank": "csb"
+
+  filename_to_bank:
+    "hdfc": "hdfc"
+    "icici": "icici"
+    "sbi": "sbi"
+    "axis": "axis"
+    "yes": "yes"
+    "federal": "federal"
+    "idfc": "idfc_first"
+    "csb": "csb"
+
+  irrelevant_filename_patterns: []
+
+  card_identifiers: {}
+
+# Auto-categorization rules
+categories:
+  Food & Dining:
+    - "swiggy"
+    - "zomato"
+    - "uber eats"
+  Transport:
+    - "uber"
+    - "ola"
+    - "rapido"
+  Shopping:
+    - "amazon"
+    - "flipkart"
+    - "myntra"
+  Entertainment:
+    - "netflix"
+    - "hotstar"
+    - "spotify"
+  Groceries:
+    - "bigbasket"
+    - "blinkit"
+    - "zepto"
+  Utilities:
+    - "electricity"
+    - "broadband"
+    - "airtel"
+    - "jio"
+  _default: "Others"
+
+# Database settings
+database:
+  path: "data/stmtforge.db"
+
+# Data directories
+data:
+  raw_pdfs: "data/raw_pdfs"
+  unlocked_pdfs: "data/unlocked_pdfs"
+  processed: "data/processed"
+
+# Logging
+logging:
+  level: "INFO"
+  file: "data/stmtforge.log"
+  max_bytes: 10485760
+  backup_count: 5
+
+# Privacy logging (DPDP-aligned)
+privacy_logging:
+  enabled: true
+  retention_days: 30
+  default_salt: "replace-in-prod"
+
+# LLM settings (Ollama)
+llm:
+  enabled: true
+  model: "qwen2.5:3b"
+  base_url: "http://localhost:11434"
+  temperature: 0
+  max_retries: 2
+  chunk_size: 3000
+  timeout: 300
+
+# OCR settings (optional)
+ocr:
+  enabled: false
+  tesseract_cmd: ""
+
+# Extraction pipeline
+extraction:
+  table_min_rows: 10
+  use_deterministic_first: true
+  store_raw_text: true
+  store_llm_output: true
