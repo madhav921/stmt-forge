@@ -4,6 +4,40 @@ import argparse
 import sys
 
 
+ENV_EXAMPLE_TEMPLATE = """# ============================================================
+# StmtForge - Environment Variables
+# ============================================================
+# Copy this file as .env and fill in your details.
+# NEVER commit .env to version control.
+
+# ---- Google OAuth ----
+# Path to the OAuth credentials JSON downloaded from Google Cloud Console
+GOOGLE_CREDENTIALS_FILE=credentials.json
+
+# ---- PDF passwords ----
+# Date of Birth (DDMMYYYY format) - used to unlock bank PDFs
+DOB=
+# PAN card number (uppercase, e.g. ABCDE1234F)
+PAN=
+# Additional passwords, comma-separated
+CUSTOM_PASSWORDS=
+
+# ---- Per-bank PDF passwords (optional overrides) ----
+SBI_PASSWORD=
+HDFC_PASSWORD=
+ICICI_PASSWORD=
+AXIS_PASSWORD=
+IDFC_PASSWORD=
+FEDERAL_PASSWORD=
+CSB_PASSWORD=
+YESBANK_PASSWORD=
+
+# ---- Privacy logging ----
+# Salt used to pseudonymize PII in event logs (change in production)
+STMTFORGE_LOG_SALT=
+"""
+
+
 def main():
     parser = argparse.ArgumentParser(
         prog="stmtforge",
@@ -68,23 +102,28 @@ def _init_project():
 
     target = Path.cwd()
     config_dst = target / "config.yaml"
+    env_example_dst = target / ".env.example"
 
     if config_dst.exists():
         print(f"config.yaml already exists in {target}")
-        return
-
-    # Copy bundled template
-    template = Path(__file__).parent / "config_template.yaml"
-    if template.exists():
-        shutil.copy2(template, config_dst)
-        print(f"Created config.yaml in {target}")
     else:
-        print("No config template found. Create config.yaml manually.")
+        # Copy bundled template
+        template = Path(__file__).parent / "config_template.yaml"
+        if template.exists():
+            shutil.copy2(template, config_dst)
+            print(f"Created config.yaml in {target}")
+        else:
+            print("No config template found. Create config.yaml manually.")
 
     # Create data directories
     for d in ["data/raw_pdfs", "data/unlocked_pdfs", "data/processed",
               "data/logs", "data/logs/events"]:
         (target / d).mkdir(parents=True, exist_ok=True)
+
+    # Create .env.example for first-time setup convenience
+    if not env_example_dst.exists():
+        env_example_dst.write_text(ENV_EXAMPLE_TEMPLATE, encoding="utf-8")
+        print(f"Created .env.example in {target}")
 
     print("Project initialized. Edit config.yaml with your settings.")
 

@@ -1,0 +1,18 @@
+include LICENSE
+include README.md
+include pyproject.toml
+
+recursive-include src/stmtforge *.py *.yaml
+
+exclude .env
+exclude .env.example
+exclude config.yaml
+exclude credentials.json
+exclude token.json
+exclude pytest.ini
+
+prune data
+prune tests
+prune .github
+prune deploy
+prune scripts

@@ -582,9 +582,32 @@ def run_pipeline(full: bool = False, local_only: bool = False,
     db = Database()
 
     if folder:
-        logger.info(f"Processing folder: {folder}")
+        # Detect bank from folder path (e.g. data/unlocked_pdfs/csb/2026_04 → csb)
+        from stmtforge.parsers.registry import list_available_parsers
+        known_banks = set(list_available_parsers())
+        folder_parts = Path(folder).resolve().parts
+        detected_bank = "unknown"
+        for part in reversed(folder_parts):
+            if part.lower() in known_banks:
+                detected_bank = part.lower()
+                break
+
+        if reprocess:
+            logger.info("Reprocess mode: resetting statement statuses for folder PDFs")
+            from stmtforge.utils.hashing import file_hash as fh
+            for pdf in Path(folder).rglob("*.pdf"):
+                h = fh(str(pdf))
+                with db._get_conn() as conn:
+                    conn.execute(
+                        "UPDATE statements_metadata SET status = 'pending', "
+                        "processed_at = NULL WHERE file_hash = ? AND status = 'completed'",
+                        (h,),
+                    )
+                    conn.execute("DELETE FROM transactions WHERE file_hash = ?", (h,))
+
+        logger.info(f"Processing folder: {folder} (bank={detected_bank})")
         pipeline = HybridPipeline(db=db)
-        results = pipeline.process_folder(folder)
+        results = pipeline.process_folder(folder, bank=detected_bank)
         total_txns = sum(r["transaction_count"] for r in results)
         logger.info(f"Folder processing complete: {total_txns} transactions")
         run_log.log_gmail_fetch(skipped=True)

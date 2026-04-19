@@ -1,9 +1,9 @@
 # StmtForge
 
+[![PyPI version](https://img.shields.io/pypi/v/stmtforge.svg)](https://pypi.org/project/stmtforge/)
 [![Tests](https://github.com/madhav921/stmt-forge/actions/workflows/tests.yml/badge.svg)](https://github.com/madhav921/stmt-forge/actions/workflows/tests.yml)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![Code style: ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg)](https://github.com/astral-sh/ruff)
 
 **A fully local, privacy-first credit card statement parser & analyzer for
 Indian banks.**
@@ -38,7 +38,13 @@ Streamlit dashboard.
 
 ## Installation
 
-### From source (recommended)
+### From PyPI
+
+```bash
+pip install stmtforge
+```
+
+### From source (for development)
 
 ```bash
 git clone https://github.com/madhav921/stmt-forge.git
@@ -65,12 +71,16 @@ pip install -e ".[dashboard,dev]"
 ```bash
 # 1. Initialize a project directory
 mkdir ~/my-statements && cd ~/my-statements
-stmtforge init          # creates config.yaml + data/ directories
+stmtforge init          # creates config.yaml, .env.example, and data/ directories
 
 # 2. (Optional) Set up Gmail — see docs below
 
 # 3. Add PDF passwords to .env
-cp .env.example .env    # then edit .env
+# Windows (PowerShell)
+Copy-Item .env.example .env
+# macOS / Linux
+# cp .env.example .env
+# then edit .env
 
 # 4. Pull an Ollama model
 ollama pull qwen2.5:3b

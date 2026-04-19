@@ -356,6 +356,37 @@ class HybridPipeline:
             "card_name": None,
         }
 
+    @staticmethod
+    def _detect_bank_from_content(pdf_path: str) -> str | None:
+        """Detect bank by scanning first page text for known bank keywords."""
+        try:
+            import pdfplumber
+            with pdfplumber.open(pdf_path) as pdf:
+                if not pdf.pages:
+                    return None
+                text = (pdf.pages[0].extract_text() or "").lower()
+                if "csb bank" in text or "edge csb" in text:
+                    return "csb"
+                if "federal bank" in text or "federalbank" in text:
+                    return "federal"
+                if "idfc first" in text or "idfcfirstbank" in text:
+                    return "idfc_first"
+                if "axis bank" in text or "axisbank" in text:
+                    return "axis"
+                if "hdfc bank" in text:
+                    return "hdfc"
+                if "sbi card" in text or "sbicard" in text:
+                    return "sbi"
+                if "icici" in text:
+                    return "icici"
+                if "yes bank" in text or "yesbank" in text:
+                    return "yes"
+                if "kotak" in text:
+                    return "kotak"
+        except Exception:
+            pass
+        return None
+
     def process_folder(self, folder_path: str, bank: str = "unknown") -> list[dict]:
         """Process all PDFs in a folder."""
         folder = Path(folder_path)
@@ -370,13 +401,20 @@ class HybridPipeline:
         for pdf_path in pdfs:
             fhash = file_hash(str(pdf_path))
 
-            # Detect bank from parent folder name
+            # Detect bank from subfolder structure within the given folder
             try:
                 rel = pdf_path.relative_to(folder)
                 parts = rel.parts
                 detected_bank = parts[0] if len(parts) > 1 else bank
             except ValueError:
                 detected_bank = bank
+
+            # If still unknown, try detecting from PDF content
+            if detected_bank == "unknown":
+                content_bank = self._detect_bank_from_content(str(pdf_path))
+                if content_bank:
+                    detected_bank = content_bank
+                    logger.info(f"Detected bank '{detected_bank}' from PDF content: {pdf_path.name}")
 
             if self.db.is_file_processed(fhash):
                 logger.debug(f"Already processed: {pdf_path.name}")

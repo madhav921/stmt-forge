@@ -48,6 +48,7 @@ ocr = [
 dev = [
     "pytest>=8.0.0",
     "build",
+    "twine",
 ]
 
 [project.scripts]
@@ -58,6 +59,7 @@ Homepage = "https://github.com/madhav921/stmt-forge"
 Repository = "https://github.com/madhav921/stmt-forge"
 Issues = "https://github.com/madhav921/stmt-forge/issues"
 Security = "https://github.com/madhav921/stmt-forge/blob/main/SECURITY.md"
+Changelog = "https://github.com/madhav921/stmt-forge/releases"
 
 [tool.setuptools.packages.find]
 where = ["src"]
