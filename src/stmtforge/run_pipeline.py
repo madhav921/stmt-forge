@@ -687,7 +687,7 @@ def run_pipeline(full: bool = False, local_only: bool = False,
     logger.info("=" * 60)
     logger.info("Pipeline Complete!")
     logger.info(f"Total transactions in DB: {summary['total_transactions']}")
-    logger.info(f"Total spend tracked: ₹{summary['total_spend']:,.2f}")
+    logger.info(f"Total spend tracked: INR {summary['total_spend']:,.2f}")
     logger.info(f"Banks: {', '.join(summary['banks'])}")
     logger.info(f"Date range: {summary['date_range']['start']} to {summary['date_range']['end']}")
     logger.info("=" * 60)
