@@ -14,6 +14,14 @@ python -m venv .venv
 pip install -e ".[dev]"
 ```
 
+Optional extras for local feature testing:
+
+```bash
+pip install -e ".[gmail]"   # Gmail fetch flow
+pip install -e ".[ocr]"     # OCR fallback flow
+pip install -e ".[all]"     # both Gmail and OCR extras
+```
+
 ## Running Tests
 
 ```bash

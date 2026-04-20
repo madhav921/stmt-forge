@@ -90,7 +90,16 @@ def main():
 
 def _launch_dashboard():
     import subprocess
-    from stmtforge.utils.config import get_project_root
+    try:
+        import streamlit  # noqa: F401
+    except ImportError:
+        print(
+            "Error: streamlit is not installed.\n"
+            "Run: pip install stmtforge  (or pip install streamlit plotly)\n"
+            "then try again.",
+            file=sys.stderr,
+        )
+        sys.exit(1)
     dashboard_module = "stmtforge.dashboard.app"
     subprocess.run([sys.executable, "-m", "streamlit", "run",
                     "-m", dashboard_module], check=False)

@@ -38,7 +38,25 @@ class PDFTextExtractor:
     def __init__(self, config: dict = None):
         self.config = config or {}
         self.table_min_rows = self.config.get("table_min_rows", 10)
-        self.ocr_enabled = self.config.get("ocr_enabled", False)
+        # OCR is used as fallback whenever the packages are installed.
+        # Set ocr_enabled: false in config to hard-disable it.
+        config_ocr = self.config.get("ocr_enabled", None)
+        if config_ocr is False:
+            self.ocr_enabled = False
+        else:
+            # Auto-detect: enable iff pdf2image + pytesseract are importable
+            try:
+                import importlib
+                importlib.import_module("pdf2image")
+                importlib.import_module("pytesseract")
+                self.ocr_enabled = True
+            except ImportError:
+                self.ocr_enabled = False
+                if config_ocr is True:
+                    logger.warning(
+                        "ocr_enabled is set to true in config but OCR packages are not "
+                        "installed. Install with: pip install stmtforge[ocr]"
+                    )
 
     # ── Stage 1: Table Extraction ────────────────────────────────
 

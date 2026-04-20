@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "stmtforge"
-version = "0.1.0"
+version = "0.1.1"
 description = "Parse credit card PDF statements from Indian banks (HDFC, ICICI, SBI, Axis, Kotak + 4 more) into structured data. Offline, privacy-first, with Streamlit dashboard."
 readme = "README.md"
 license = {text = "MIT"}
@@ -34,20 +34,20 @@ classifiers = [
 ]
 
 dependencies = [
-    "google-api-python-client>=2.100.0",
-    "google-auth-httplib2>=0.1.0",
-    "google-auth-oauthlib>=1.1.0",
     "pikepdf>=8.0.0",
     "pdfplumber>=0.10.0",
     "pandas>=2.0.0",
     "pyyaml>=6.0",
     "python-dotenv>=1.0.0",
+    "streamlit>=1.28.0",
+    "plotly>=5.18.0",
 ]
 
 [project.optional-dependencies]
-dashboard = [
-    "streamlit>=1.28.0",
-    "plotly>=5.18.0",
+gmail = [
+    "google-api-python-client>=2.100.0",
+    "google-auth-httplib2>=0.1.0",
+    "google-auth-oauthlib>=1.1.0",
 ]
 ocr = [
     "pdf2image>=1.16.0",
@@ -58,6 +58,14 @@ dev = [
     "pytest>=8.0.0",
     "build",
     "twine",
+]
+all = [
+    "google-api-python-client>=2.100.0",
+    "google-auth-httplib2>=0.1.0",
+    "google-auth-oauthlib>=1.1.0",
+    "pdf2image>=1.16.0",
+    "pytesseract>=0.3.10",
+    "Pillow>=10.0.0",
 ]
 
 [project.scripts]

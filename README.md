@@ -74,6 +74,14 @@ StmtForge includes a **Streamlit analytics dashboard** with interactive charts, 
 pip install stmtforge
 ```
 
+Optional extras:
+
+```bash
+pip install "stmtforge[gmail]"      # Gmail fetch support
+pip install "stmtforge[ocr]"        # OCR fallback support
+pip install "stmtforge[all]"        # Gmail + OCR extras
+```
+
 ### From Source
 
 ```bash
@@ -82,7 +90,8 @@ cd stmt-forge
 python -m venv .venv
 .venv\Scripts\activate        # Windows
 # source .venv/bin/activate   # macOS / Linux
-pip install -e ".[dashboard,dev]"
+pip install -e ".[dev]"             # developer tools only
+pip install -e ".[dev,all]"         # developer tools + Gmail + OCR extras
 ```
 
 ### Requirements
@@ -92,6 +101,7 @@ pip install -e ".[dashboard,dev]"
 | Python 3.11+ | Runtime |
 | [Ollama](https://ollama.com/) *(optional)* | Local LLM for unstructured PDF parsing |
 | Google Cloud project *(optional)* | Gmail API — not needed for manual PDF import |
+| Tesseract OCR binary *(optional)* | Required by OCR fallback when `stmtforge[ocr]` is installed |
 | qpdf *(optional)* | Fallback PDF decryption |
 
 ---

@@ -4,10 +4,14 @@ import os
 import stat
 from pathlib import Path
 
-from google.auth.transport.requests import Request
-from google.oauth2.credentials import Credentials
-from google_auth_oauthlib.flow import InstalledAppFlow
-from googleapiclient.discovery import build
+try:
+    from google.auth.transport.requests import Request
+    from google.oauth2.credentials import Credentials
+    from google_auth_oauthlib.flow import InstalledAppFlow
+    from googleapiclient.discovery import build
+    _GMAIL_DEPS_AVAILABLE = True
+except ImportError:
+    _GMAIL_DEPS_AVAILABLE = False
 
 from stmtforge.utils.config import load_config, resolve_path
 from stmtforge.utils.logging_config import get_logger
@@ -17,6 +21,12 @@ logger = get_logger("gmail.auth")
 
 def get_gmail_service():
     """Authenticate and return a Gmail API service instance (read-only)."""
+    if not _GMAIL_DEPS_AVAILABLE:
+        raise ImportError(
+            "Gmail dependencies are not installed. "
+            "Run: pip install stmtforge[gmail]"
+        )
+
     config = load_config()
     gmail_config = config["gmail"]
 

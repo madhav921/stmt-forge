@@ -371,6 +371,18 @@ def run_gmail_fetch(db: Database, full: bool = False,
             )
         return downloaded
 
+    except ImportError:
+        logger.error(
+            "Gmail dependencies are not installed. "
+            "Run: pip install stmtforge[gmail]  — then re-run without --local."
+        )
+        logger.info("Continuing with local PDF processing...")
+        if run_log:
+            run_log.log_gmail_fetch(skipped=True)
+        if event_logger:
+            event_logger.log_event("gmail_fetch_skipped", {"reason": "deps_not_installed"},
+                                   source="pipeline.gmail", severity="warning")
+        return []
     except FileNotFoundError as e:
         logger.error(f"Gmail setup incomplete: {e}")
         logger.info("Continuing with local PDF processing...")
